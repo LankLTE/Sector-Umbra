@@ -1295,22 +1295,6 @@ namespace Content.Shared.CCVar
          */
 
         /// <summary>
-        ///     If the playercount is below this number, the whitelist will not apply.
-        /// </summary>
-        public static readonly CVarDef<int> WhitelistMinPlayers =
-            CVarDef.Create("whitelist.min_players", 0, CVar.SERVERONLY);
-
-        /// <summary>
-        ///     If the playercount is above this number, the whitelist will not apply.
-        /// </summary>
-        public static readonly CVarDef<int> WhitelistMaxPlayers =
-            CVarDef.Create("whitelist.max_players", int.MaxValue, CVar.SERVERONLY);
-
-        /*
-         * VOTE
-         */
-
-        /// <summary>
         ///     Allows enabling/disabling player-started votes for ultimate authority
         /// </summary>
         public static readonly CVarDef<bool> VoteEnabled =

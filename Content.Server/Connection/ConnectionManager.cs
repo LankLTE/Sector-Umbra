@@ -218,12 +218,18 @@ namespace Content.Server.Connection
             }
 
             if (_cfg.GetCVar(CCVars.WhitelistEnabled))
-            {
-                var connectedPlayers = _plyMgr.PlayerCount;
-                var whitelistedPlayers = _connectedWhitelistedPlayers.Count;
+            { 
+                var connectedPlayers = _plyMgr.Sessions;
+                var whitelistedPlayers = connectedPlayers.Length;
+                // Track how many whitelisted players there are. This might be a shit way of doing it but oh well.
+                foreach(var player in connectedPlayers)
+                {
+                    if (await _db.GetWhitelistStatusAsync(userId) == false && adminData is null)
+                        whitelistedPlayers--;
+                }
 
                 var openSlots = _cfg.GetCVar(CCVars.WhitelistOpenSlots);
-                var playerCountValid = openSlots < connectedPlayers - whitelistedPlayers;
+                var playerCountValid = openSlots < (_plyMgr.PlayerCount - whitelistedPlayers);
                 if (playerCountValid && await _db.GetWhitelistStatusAsync(userId) == false && adminData is null)
                 {
                     var msg = Loc.GetString(_cfg.GetCVar(CCVars.WhitelistReason));
