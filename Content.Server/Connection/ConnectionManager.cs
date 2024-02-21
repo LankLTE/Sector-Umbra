@@ -53,6 +53,8 @@ namespace Content.Server.Connection
 
         private List<NetUserId> _connectedWhitelistedPlayers = new();
 
+        private List<NetUserId> _connectedWhitelistedPlayers = new();
+
         public void Initialize()
         {
             _sawmill = _logManager.GetSawmill("connections");
@@ -65,15 +67,6 @@ namespace Content.Server.Connection
             // _netMgr.HandleApprovalCallback = HandleApproval;
 
             _cfg.OnValueChanged(CCVars.WhitelistEnabled, WhitelistCVarChanged, true);
-        }
-
-        public void AddTemporaryConnectBypass(NetUserId user, TimeSpan duration)
-        {
-            ref var time = ref CollectionsMarshal.GetValueRefOrAddDefault(_temporaryBypasses, user, out _);
-            var newTime = _gameTiming.RealTime + duration;
-            // Make sure we only update the time if we wouldn't shrink it.
-            if (newTime > time)
-                time = newTime;
         }
 
         /*
@@ -218,18 +211,12 @@ namespace Content.Server.Connection
             }
 
             if (_cfg.GetCVar(CCVars.WhitelistEnabled))
-            { 
-                var connectedPlayers = _plyMgr.Sessions;
-                var whitelistedPlayers = connectedPlayers.Length;
-                // Track how many whitelisted players there are. This might be a shit way of doing it but oh well.
-                foreach(var player in connectedPlayers)
-                {
-                    if (await _db.GetWhitelistStatusAsync(player.UserId) == false)
-                        whitelistedPlayers--;
-                }
+            {
+                var connectedPlayers = _plyMgr.PlayerCount;
+                var whitelistedPlayers = _connectedWhitelistedPlayers.Count;
 
                 var openSlots = _cfg.GetCVar(CCVars.WhitelistOpenSlots);
-                var playerCountValid = openSlots < (_plyMgr.PlayerCount - whitelistedPlayers);
+                var playerCountValid = openSlots < connectedPlayers - whitelistedPlayers;
                 if (playerCountValid && await _db.GetWhitelistStatusAsync(userId) == false && adminData is null)
                 {
                     var msg = Loc.GetString(_cfg.GetCVar(CCVars.WhitelistReason));
